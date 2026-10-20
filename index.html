@@ -27,7 +27,7 @@ h1{font-size:22px;margin:0 0 6px}.meta{color:var(--muted);font-size:13px;margin-
 @media(max-width:760px){
  html,body{height:100%;overflow:hidden;background:white} body{display:block;padding-bottom:64px}
  aside{position:fixed;inset:0 0 64px 0;height:auto;overflow:auto;padding:14px 12px 28px;box-shadow:none;z-index:500;background:#fff;-webkit-overflow-scrolling:touch}
- #map{position:fixed;inset:0 0 64px 0;height:auto;display:none;z-index:450}
+ #map{position:fixed;top:0;left:0;right:0;bottom:calc(64px + env(safe-area-inset-bottom));height:auto!important;min-height:320px;display:none;z-index:450;background:#e5e7eb}
  body.map-mode aside{display:none} body.map-mode #map{display:block}
  .mobile-tabs{display:grid;grid-template-columns:1fr 1fr;position:fixed;left:0;right:0;bottom:0;height:64px;z-index:2000;background:#fff;border-top:1px solid #cbd5e1;padding-bottom:env(safe-area-inset-bottom)}
  .mobile-tabs button{border:0;background:#fff;font-size:14px;font-weight:800;color:#475569}.mobile-tabs button.active{color:#b45309;background:#fffbeb}
@@ -48,6 +48,7 @@ h1{font-size:22px;margin:0 0 6px}.meta{color:var(--muted);font-size:13px;margin-
 <div class="hint">Klepnutím na značku zobrazíte podrobnosti. Po návštěvě označte hospodu jako navštívenou.</div>
 </aside>
 <div id="map"></div>
+<nav class="mobile-tabs" aria-label="Mobilní navigace"><button id="tabList" class="active" type="button">🍺 Tour</button><button id="tabMap" type="button">🗺️ Mapa</button></nav>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
 const pubs=[
@@ -77,11 +78,10 @@ window.toggle=(n,v)=>{visited[n]=v;render()};window.setBeers=(person,n,v)=>{beer
 function setMobileView(mode){
  document.body.classList.toggle('map-mode',mode==='map');
  const a=document.getElementById('tabList'),b=document.getElementById('tabMap'); if(a&&b){a.classList.toggle('active',mode==='list');b.classList.toggle('active',mode==='map')}
- if(mode==='map') setTimeout(()=>map.invalidateSize(),50);
+ if(mode==='map'){requestAnimationFrame(()=>{map.invalidateSize(true);setTimeout(()=>map.invalidateSize(true),250)})}
 }
-const tabList=document.getElementById('tabList'),tabMap=document.getElementById('tabMap');
-if(tabList)tabList.onclick=()=>setMobileView('list'); if(tabMap)tabMap.onclick=()=>setMobileView('map');
-if(window.matchMedia('(max-width:760px)').matches)setMobileView('list');
+function bindMobileTabs(){const tabList=document.getElementById('tabList'),tabMap=document.getElementById('tabMap');if(tabList)tabList.onclick=()=>setMobileView('list');if(tabMap)tabMap.onclick=()=>setMobileView('map');if(window.matchMedia('(max-width:760px)').matches)setMobileView('list');}
+if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',bindMobileTabs)}else{bindMobileTabs()}
 </script>
-<nav class="mobile-tabs" aria-label="Mobilní navigace"><button id="tabList" class="active" type="button">🍺 Tour</button><button id="tabMap" type="button">🗺️ Mapa</button></nav></body>
+</body>
 </html>
